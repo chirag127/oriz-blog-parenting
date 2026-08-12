@@ -1,17 +1,19 @@
 ---
 /**
- * /  — Parenting & Family homepage ("The Kitchen Wall").
+ * /  — Parenting & Family homepage, WARM CARD-FEED (SOCIAL) archetype.
  *
- * Hero is a thesis, not a big number: a warm sentence about how family life is
- * built one small week at a time, pinned beside the signature element — the
- * doorframe growth-chart ruler (vertical tick rail with milestone labels).
+ * A single-column, gently scrolling timeline — like a calm family group where
+ * everything worth keeping floats up as a soft rounded card. The feed opens
+ * with a thesis card (the signature doorframe growth-ruler tucked inside it),
+ * then flows:
  *
- * Below, three warm strata:
- *   1. Ongoing        — series, framed as "chapters still being written"
- *   2. Fresh from the wall — recent posts, each with a crayon vertical chip
- *   3. Corners of the house — categories as crayon-tinted links
+ *   • a pinned "Start here" card (the lead)
+ *   • "Still writing" — in-progress series, as compact progress cards
+ *   • the running feed of recent posts, each a soft social card
+ *   • "Corners of the house" — categories as crayon chips
+ *   • an "all caught up" cap that closes the timeline
  *
- * Verticals (Everyday/Learning/Wellbeing/Home/Us) each carry a crayon colour
+ * Verticals (Everyday/Learning/Wellbeing/Home/Us) carry a crayon colour
  * (--v-*). Rounded surfaces, mulberry accent, no cover images.
  */
 import BaseLayout from '~/layouts/BaseLayout.astro'
@@ -31,7 +33,7 @@ import { SITE_CONFIG } from '~/lib/config'
 
 const allPosts = await getPublishedPosts()
 const lead = allPosts[0]
-const recentPosts = allPosts.slice(1, 8)
+const recentPosts = allPosts.slice(1, 9)
 
 const seriesAll = await getSeriesWithCounts()
 type InProgress = {
@@ -44,7 +46,7 @@ type InProgress = {
   parts: Awaited<ReturnType<typeof getPostsInSeries>>
 }
 const inProgress: InProgress[] = []
-for (const { series, count } of seriesAll.slice(0, 4)) {
+for (const { series, count } of seriesAll.slice(0, 3)) {
   const parts = await getPostsInSeries(series)
   const latest = parts.reduce(
     (max, p) => (p.data.pubDate > max ? p.data.pubDate : max),
@@ -83,6 +85,9 @@ function ago(date: Date): string {
   const years = Math.floor(days / 365)
   return years === 1 ? '1 year ago' : `${years} years ago`
 }
+function dateLabel(d: Date): string {
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 // The doorframe growth ruler: milestone ticks, each a real stage of a family.
 const milestones = [
@@ -109,26 +114,20 @@ const jsonLd = {
   jsonLd={jsonLd}
   hideSidebar
 >
-  <div class="container-page">
-    {/* ── Hero: thesis beside the doorframe growth ruler ─────────────── */}
-    <section class="hero" aria-label="Introduction">
-      <div class="hero-copy">
-        <p class="hero-eyebrow">Kitchen Table · a family notebook</p>
-        <h1 class="hero-thesis">
-          A family isn't built in a grand plan. It's built one small week at a time.
-        </h1>
-        <p class="hero-lede">
-          Calm, tested notes on raising kids — screens, sleep, reading, routines, and the
-          ordinary days in between. No shame, no perfect parents. Just what actually helps.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="/blog/">Read the latest</a>
-          <a class="btn btn-ghost" href="/about/">What this is</a>
-        </div>
-      </div>
+  <div class="feed">
+    {/* ── Thesis card: the hero, with the doorframe ruler tucked inside ─── */}
+    <section class="card card-hero" aria-label="Introduction">
+      <p class="hero-eyebrow">Kitchen Table · a family notebook</p>
+      <h1 class="hero-thesis">
+        A family isn't built in a grand plan. It's built one small week at a time.
+      </h1>
+      <p class="hero-lede">
+        Calm, tested notes on raising kids — screens, sleep, reading, routines, and the
+        ordinary days in between. No shame, no perfect parents. Just what actually helps.
+      </p>
 
-      {/* Signature element — the doorframe growth chart. */}
-      <aside class="growth-rail" aria-label="How families grow, marked like a doorframe">
+      {/* Signature element — the doorframe growth chart, now inline in the card. */}
+      <div class="growth-rail" aria-label="How families grow, marked like a doorframe">
         <span class="growth-caption">Marks on the doorframe</span>
         <ol class="growth-ticks">
           {milestones.map((m) => (
@@ -139,42 +138,49 @@ const jsonLd = {
             </li>
           ))}
         </ol>
-      </aside>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/blog/">Read the latest</a>
+        <a class="btn btn-ghost" href="/about/">What this is</a>
+      </div>
     </section>
 
     {lead && (
-      <section class="lead" data-vertical={leadVertical} aria-labelledby="lead-title">
-        <a class="lead-link" href={`/blog/${lead.id}`}>
-          <span class="lead-kicker">
+      <article class="card card-lead" data-vertical={leadVertical} aria-labelledby="lead-title">
+        <a class="feed-link" href={`/blog/${lead.id}`}>
+          <span class="feed-kicker">
             <span class="chip-dot" aria-hidden="true"></span>
-            <span class="lead-desk">{verticalLabel(leadVertical)}</span>
-            <span class="lead-flag">Start here</span>
+            <span class="feed-desk">{verticalLabel(leadVertical)}</span>
+            <span class="feed-flag">Start here</span>
           </span>
           <h2 id="lead-title" class="lead-title">{lead.data.title}</h2>
           <p class="lead-dek">{lead.data.description}</p>
-          <span class="lead-meta">
-            <time datetime={lead.data.pubDate.toISOString()}>{lead.data.pubDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</time>
+          <span class="feed-meta">
+            <time datetime={lead.data.pubDate.toISOString()}>{dateLabel(lead.data.pubDate)}</time>
             <span aria-hidden="true">·</span>
             <span>{leadRt}</span>
           </span>
         </a>
-      </section>
+      </article>
     )}
 
-    {/* ── Stratum 1 — ONGOING ───────────────────────────────────────── */}
+    {/* ── Still writing — in-progress series as compact progress cards ──── */}
     {inProgress.length > 0 && (
-      <section class="stratum" aria-labelledby="s-progress">
-        <h2 id="s-progress" class="stratum-h">Chapters still being written</h2>
-        <ul class="progress-list">
+      <section aria-labelledby="s-progress">
+        <h2 id="s-progress" class="feed-divider">Still writing</h2>
+        <ul class="stack">
           {inProgress.map((s) => (
-            <li class="progress-row">
-              <a class="progress-link" href={`/series/${s.slug}/`}>
-                <span class="progress-name">{s.name}</span>
-                <span class="progress-spine-mount">
+            <li>
+              <a class="card card-series" href={`/series/${s.slug}/`}>
+                <span class="series-top">
+                  <span class="series-name">{s.name}</span>
+                  <span class="series-ago">{ago(s.latest)}</span>
+                </span>
+                <span class="series-spine-mount">
                   <SeriesSpine total={s.total} published={s.published} current={s.current} size="md" />
                 </span>
-                <span class="progress-meta">part {s.published} of {s.total}</span>
-                <span class="progress-ago">{ago(s.latest)}</span>
+                <span class="series-meta">part {s.published} of {s.total}</span>
               </a>
             </li>
           ))}
@@ -182,26 +188,26 @@ const jsonLd = {
       </section>
     )}
 
-    {/* ── Stratum 2 — RECENT ────────────────────────────────────────── */}
-    <section class="stratum" aria-labelledby="s-recent">
-      <h2 id="s-recent" class="stratum-h">Fresh from the wall</h2>
-      <ul class="recent-list">
+    {/* ── The running feed of recent posts ──────────────────────────────── */}
+    <section aria-labelledby="s-recent">
+      <h2 id="s-recent" class="feed-divider">Fresh from the wall</h2>
+      <ul class="stack">
         {recentPosts.map((p) => (
-          <li class="recent-row" data-vertical={postVertical(p)}>
-            <a class="recent-link" href={`/blog/${p.id}`}>
-              <span class="recent-meat">
-                <span class="recent-kicker">
+          <li>
+            <article class="card card-post" data-vertical={postVertical(p)}>
+              <a class="feed-link" href={`/blog/${p.id}`}>
+                <span class="feed-kicker">
                   <span class="chip-dot" aria-hidden="true"></span>{verticalLabel(postVertical(p))}
                 </span>
-                <span class="recent-title">{p.data.title}</span>
-                <span class="recent-dek">{p.data.description}</span>
-                <span class="recent-meta">
-                  <time datetime={p.data.pubDate.toISOString()}>{p.data.pubDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</time>
+                <span class="post-title">{p.data.title}</span>
+                <span class="post-dek">{p.data.description}</span>
+                <span class="feed-meta">
+                  <time datetime={p.data.pubDate.toISOString()}>{dateLabel(p.data.pubDate)}</time>
                   <span aria-hidden="true">·</span>
                   <span>{p.data.readingTime ?? readingTimeFor(p)}</span>
                 </span>
-              </span>
-            </a>
+              </a>
+            </article>
           </li>
         ))}
       </ul>
@@ -210,10 +216,10 @@ const jsonLd = {
       </p>
     </section>
 
-    {/* ── Stratum 3 — CATEGORIES ────────────────────────────────────── */}
+    {/* ── Corners of the house — categories as crayon chips ─────────────── */}
     {cats.length > 0 && (
-      <section class="stratum" aria-labelledby="s-cats">
-        <h2 id="s-cats" class="stratum-h">Corners of the house</h2>
+      <section aria-labelledby="s-cats">
+        <h2 id="s-cats" class="feed-divider">Corners of the house</h2>
         <ul class="cats-grid">
           {cats.map((c) => (
             <li>
@@ -227,14 +233,36 @@ const jsonLd = {
         </ul>
       </section>
     )}
+
+    {/* ── Feed cap — closes the timeline the way a social feed does ─────── */}
+    <p class="feed-cap" role="note">
+      <span class="feed-cap-mark" aria-hidden="true">·</span>
+      You're all caught up. Come back for the next small week.
+    </p>
   </div>
 </BaseLayout>
 
 <style>
-  .container-page {
-    max-width: 1040px;
-    margin-inline: auto;
-    padding-inline: clamp(1.25rem, 4vw, 2rem);
+  /* ── Feed column ─────────────────────────────────────────────────────── */
+  .feed {
+    padding-inline: clamp(0.9rem, 4vw, 1.25rem);
+    padding-block: clamp(1.25rem, 4vw, 2rem) 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 3vw, 1.4rem);
+  }
+  .stack { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: clamp(0.75rem, 2.5vw, 1rem); }
+
+  /* Section labels read as timeline dividers, not magazine section heads. */
+  .feed-divider {
+    font-family: var(--font-utility, var(--font-body));
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin: 0.5rem 0 0.15rem;
+    padding-left: 0.15rem;
   }
 
   /* Shared crayon chip-dot used across kickers + category chips. */
@@ -246,104 +274,71 @@ const jsonLd = {
     flex: 0 0 auto;
   }
 
-  /* ── Hero ──────────────────────────────────────────────────────────── */
+  /* ── The soft card — the whole feed is made of these ─────────────────── */
+  .card {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-card);
+    box-shadow: 0 1px 0 var(--rule), 0 8px 24px -20px color-mix(in oklab, var(--ink) 40%, transparent);
+  }
+  .feed-link { display: grid; gap: 0.55rem; color: var(--ink); text-decoration: none; }
 
-  .hero {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: clamp(2rem, 5vw, 3.5rem);
-    padding-block: clamp(2.5rem, 7vw, 4.5rem) clamp(1.5rem, 4vw, 2.5rem);
-    align-items: center;
+  .feed-kicker {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--font-utility);
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--v, var(--ink-mute));
   }
-  @media (min-width: 900px) {
-    .hero {
-      grid-template-columns: minmax(0, 1fr) 260px;
-    }
+  .feed-desk { color: var(--v, var(--accent)); }
+  .feed-flag { color: var(--accent); padding-left: 0.55rem; border-left: 1px solid var(--rule-strong); }
+  .feed-meta {
+    display: inline-flex; gap: 0.5rem; align-items: center; margin-top: 0.1rem;
+    font-family: var(--font-utility);
+    font-size: 12px; font-weight: 500; color: var(--ink-mute);
   }
+
+  /* ── Hero card ───────────────────────────────────────────────────────── */
+  .card-hero { padding: clamp(1.5rem, 5vw, 2.25rem); }
   .hero-eyebrow {
     font-family: var(--font-utility);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--accent);
-    margin: 0 0 1.25rem;
+    margin: 0 0 1rem;
   }
   .hero-thesis {
     font-family: var(--font-display);
     font-optical-sizing: auto;
     font-weight: 540;
-    font-size: clamp(2.15rem, 5.4vw, 3.5rem);
-    line-height: 1.08;
+    font-size: clamp(1.9rem, 6.5vw, 2.7rem);
+    line-height: 1.1;
     letter-spacing: -0.02em;
     color: var(--ink);
     margin: 0;
-    max-width: 18ch;
     text-wrap: balance;
   }
   .hero-lede {
     font-family: var(--font-body);
-    font-size: clamp(1.0625rem, 1.8vw, 1.25rem);
+    font-size: clamp(1rem, 2.2vw, 1.125rem);
     line-height: 1.55;
     color: var(--ink-mute);
-    margin: 1.5rem 0 0;
-    max-width: 46ch;
-  }
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1.75rem;
-  }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 0.7rem 1.35rem;
-    border-radius: var(--radius-button);
-    text-decoration: none;
-    transition:
-      background var(--dur-fast) var(--ease-out),
-      color var(--dur-fast) var(--ease-out),
-      border-color var(--dur-fast) var(--ease-out);
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: var(--color-accent-fg);
-    border: 1px solid var(--accent);
-  }
-  .btn-primary:hover {
-    background: color-mix(in oklab, var(--accent) 86%, black);
-  }
-  .btn-ghost {
-    background: transparent;
-    color: var(--ink);
-    border: 1px solid var(--rule-strong);
-  }
-  .btn-ghost:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    margin: 1.1rem 0 0;
   }
 
-  /* ── Signature: doorframe growth ruler ─────────────────────────────── */
-
+  /* ── Signature: doorframe growth ruler (now horizontal ticks in-card) ── */
   .growth-rail {
     position: relative;
-    padding: 1.5rem 1.25rem 1.5rem 1.75rem;
-    background: var(--paper-2);
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.1rem 1.25rem 1.6rem;
+    background: color-mix(in oklab, var(--accent) 4%, var(--paper));
     border: 1px solid var(--rule);
-    border-radius: var(--radius-card);
-    box-shadow: 0 1px 0 var(--rule);
+    border-radius: calc(var(--radius-card) - 6px);
   }
-  /* the doorframe edge — a soft wooden rail down the left */
   .growth-rail::before {
     content: '';
     position: absolute;
     left: 0.85rem;
-    top: 2.4rem;
-    bottom: 1.5rem;
+    top: 2.1rem;
+    bottom: 1.25rem;
     width: 2px;
     background: color-mix(in oklab, var(--accent) 45%, var(--rule));
     border-radius: 2px;
@@ -351,21 +346,14 @@ const jsonLd = {
   .growth-caption {
     display: block;
     font-family: var(--font-utility);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--ink-mute);
-    margin-bottom: 1.1rem;
+    margin-bottom: 1rem;
     padding-left: 0.35rem;
   }
   .growth-ticks {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 0.8rem;
   }
   .growth-tick {
     position: relative;
@@ -375,210 +363,114 @@ const jsonLd = {
     gap: 0.65rem;
     padding-left: 0.35rem;
   }
-  /* pencil height-mark reaching from the rail */
   .growth-tick-line {
     position: absolute;
-    left: 0.5rem;
-    top: 0.55em;
-    width: 0.9rem;
-    height: 2px;
+    left: 0.5rem; top: 0.55em;
+    width: 0.9rem; height: 2px;
     background: var(--accent);
     border-radius: 2px;
   }
   .growth-tick-age {
     font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent);
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    text-align: right; font-variant-numeric: tabular-nums;
   }
   .growth-tick-label {
     font-family: var(--font-display);
-    font-size: 0.95rem;
-    font-weight: 460;
-    color: var(--ink);
-    line-height: 1.25;
+    font-size: 0.95rem; font-weight: 460; color: var(--ink); line-height: 1.25;
   }
 
-  /* ── Lead / "Start here" ───────────────────────────────────────────── */
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.5rem; }
+  .btn {
+    display: inline-flex; align-items: center;
+    font-family: var(--font-body); font-weight: 600; font-size: 0.95rem;
+    padding: 0.65rem 1.3rem;
+    border-radius: var(--radius-button);
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .btn-primary { background: var(--accent); color: var(--color-accent-fg); border: 1px solid var(--accent); }
+  .btn-primary:hover { background: color-mix(in oklab, var(--accent) 86%, black); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule-strong); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
-  .lead {
+  /* ── Lead / "Start here" card ────────────────────────────────────────── */
+  .card-lead {
     --v: var(--v-personal);
-    margin-top: 0.5rem;
-    padding: clamp(1.5rem, 3vw, 2.25rem);
-    background: var(--paper-2);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-card);
+    padding: clamp(1.35rem, 4vw, 1.85rem);
     border-left: 4px solid var(--v);
   }
-  .lead[data-vertical='dev'] { --v: var(--v-dev); }
-  .lead[data-vertical='finance'] { --v: var(--v-finance); }
-  .lead[data-vertical='culture'] { --v: var(--v-culture); }
-  .lead[data-vertical='health'] { --v: var(--v-health); }
-  .lead-link { display: grid; gap: 0.65rem; color: var(--ink); text-decoration: none; }
-  .lead-kicker {
-    display: inline-flex; align-items: center; gap: 0.55rem;
-    font-family: var(--font-utility);
-    font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--ink-mute);
-  }
-  .lead-desk { color: var(--v); }
-  .lead-flag { color: var(--accent); padding-left: 0.55rem; border-left: 1px solid var(--rule-strong); }
+  .card-lead[data-vertical='dev'] { --v: var(--v-dev); }
+  .card-lead[data-vertical='finance'] { --v: var(--v-finance); }
+  .card-lead[data-vertical='culture'] { --v: var(--v-culture); }
+  .card-lead[data-vertical='health'] { --v: var(--v-health); }
   .lead-title {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    font-size: clamp(1.65rem, 3.6vw, 2.35rem);
-    font-weight: 540;
-    letter-spacing: -0.018em;
-    line-height: 1.12;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-weight: 540; letter-spacing: -0.018em; line-height: 1.14;
     margin: 0;
-    max-width: 22ch;
   }
-  .lead-link:hover .lead-title { color: var(--accent); }
+  .card-lead .feed-link:hover .lead-title { color: var(--accent); }
   .lead-dek {
     font-family: var(--font-body);
-    font-size: 1.0625rem;
-    line-height: 1.55;
-    color: var(--ink-mute);
-    margin: 0;
-    max-width: 58ch;
-  }
-  .lead-meta {
-    display: inline-flex; gap: 0.5rem; align-items: center;
-    font-family: var(--font-utility);
-    font-size: 12px; font-weight: 500; color: var(--ink-mute);
+    font-size: 1.05rem; line-height: 1.55; color: var(--ink-mute); margin: 0;
   }
 
-  /* ── Strata ────────────────────────────────────────────────────────── */
-
-  .stratum { padding-block: clamp(2rem, 5vw, 3rem) 0.5rem; }
-  .stratum-h {
-    font-family: var(--font-display);
-    font-optical-sizing: auto;
-    font-size: clamp(1.35rem, 2.6vw, 1.75rem);
-    font-weight: 520;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-    margin: 0 0 1.35rem;
-  }
-
-  /* ── Ongoing ───────────────────────────────────────────────────────── */
-
-  .progress-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
-  .progress-link {
+  /* ── Series (in-progress) cards ──────────────────────────────────────── */
+  .card-series {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
-    gap: 1rem;
-    align-items: center;
+    gap: 0.55rem;
+    padding: 1rem 1.15rem;
     color: var(--ink);
     text-decoration: none;
-    padding: 0.85rem 1.1rem;
-    background: var(--paper-2);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-card);
-    transition: border-color var(--dur-fast) var(--ease-out);
-  }
-  .progress-link:hover { border-color: var(--accent); }
-  .progress-link:hover .progress-name { color: var(--accent); }
-  .progress-name {
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .progress-meta, .progress-ago {
-    font-family: var(--font-utility);
-    font-size: 12px; font-weight: 500; color: var(--ink-mute);
-  }
-  .progress-spine-mount { display: inline-flex; }
-
-  @media (max-width: 640px) {
-    .progress-link {
-      grid-template-columns: 1fr auto;
-      grid-template-areas: 'name ago' 'spine meta';
-      row-gap: 0.4rem;
-    }
-    .progress-name { grid-area: name; }
-    .progress-spine-mount { grid-area: spine; }
-    .progress-meta { grid-area: meta; text-align: right; }
-    .progress-ago { grid-area: ago; text-align: right; }
-  }
-
-  /* ── Recent ────────────────────────────────────────────────────────── */
-
-  .recent-list {
-    list-style: none; padding: 0; margin: 0;
-    display: grid;
-    gap: 0.85rem;
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 720px) {
-    .recent-list { grid-template-columns: 1fr 1fr; }
-  }
-  .recent-row {
-    --v: var(--v-personal);
-  }
-  .recent-row[data-vertical='dev'] { --v: var(--v-dev); }
-  .recent-row[data-vertical='finance'] { --v: var(--v-finance); }
-  .recent-row[data-vertical='culture'] { --v: var(--v-culture); }
-  .recent-row[data-vertical='health'] { --v: var(--v-health); }
-  .recent-link {
-    display: block;
-    height: 100%;
-    color: var(--ink);
-    text-decoration: none;
-    padding: 1.1rem 1.25rem;
-    background: var(--paper-2);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-card);
-    border-top: 3px solid var(--v);
     transition: border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
   }
-  .recent-link:hover { border-color: var(--accent); border-top-color: var(--v); transform: translateY(-2px); }
-  .recent-link:hover .recent-title { color: var(--accent); }
-  .recent-meat { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
-  .recent-kicker {
-    display: inline-flex; align-items: center; gap: 0.45rem;
-    font-family: var(--font-utility);
-    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--v);
-  }
-  .recent-title {
+  .card-series:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card-series:hover .series-name { color: var(--accent); }
+  .series-top { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
+  .series-name {
     font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 520;
-    letter-spacing: -0.012em;
-    color: var(--ink);
-    line-height: 1.2;
+    font-size: 1.1rem; font-weight: 520; letter-spacing: -0.01em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .recent-dek {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    color: var(--ink-mute);
-    line-height: 1.5;
-    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
-  }
-  .recent-meta {
-    display: inline-flex; gap: 0.5rem; align-items: center; margin-top: 0.15rem;
+  .series-ago, .series-meta {
     font-family: var(--font-utility);
     font-size: 12px; font-weight: 500; color: var(--ink-mute);
+    flex: 0 0 auto;
+  }
+  .series-spine-mount { display: inline-flex; }
+
+  /* ── Post cards (the running feed) ───────────────────────────────────── */
+  .card-post {
+    --v: var(--v-personal);
+    padding: clamp(1.15rem, 3.5vw, 1.4rem);
+    border-left: 4px solid var(--v);
+    transition: border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .card-post[data-vertical='dev'] { --v: var(--v-dev); }
+  .card-post[data-vertical='finance'] { --v: var(--v-finance); }
+  .card-post[data-vertical='culture'] { --v: var(--v-culture); }
+  .card-post[data-vertical='health'] { --v: var(--v-health); }
+  .card-post:hover { transform: translateY(-2px); box-shadow: 0 1px 0 var(--rule), 0 14px 30px -20px color-mix(in oklab, var(--ink) 55%, transparent); }
+  .card-post:hover .post-title { color: var(--accent); }
+  .post-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem; font-weight: 520; letter-spacing: -0.012em;
+    color: var(--ink); line-height: 1.2;
+  }
+  .post-dek {
+    font-family: var(--font-body);
+    font-size: 0.975rem; color: var(--ink-mute); line-height: 1.5;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
   }
 
-  .all-link { margin: 1.5rem 0 0; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; }
-  .all-link a {
-    color: var(--accent);
-    text-decoration: none;
-  }
+  .all-link { margin: 1.1rem 0 0; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; padding-left: 0.15rem; }
+  .all-link a { color: var(--accent); text-decoration: none; }
   .all-link a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-  /* ── Categories ────────────────────────────────────────────────────── */
-
-  .cats-grid {
-    list-style: none; margin: 0; padding: 0;
-    display: flex; flex-wrap: wrap; gap: 0.65rem;
-  }
+  /* ── Categories ──────────────────────────────────────────────────────── */
+  .cats-grid { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .cats-chip {
     --v: var(--v-personal);
     display: inline-flex; align-items: center; gap: 0.5rem;
@@ -595,9 +487,15 @@ const jsonLd = {
   .cats-chip[data-vertical='health'] { --v: var(--v-health); }
   .cats-chip:hover { border-color: var(--v); background: color-mix(in oklab, var(--v) 8%, var(--paper-2)); }
   .cats-name { font-family: var(--font-body); font-size: 0.95rem; font-weight: 550; }
-  .cats-count {
-    font-family: var(--font-mono);
-    font-size: 11px; color: var(--ink-mute);
-    font-variant-numeric: tabular-nums;
+  .cats-count { font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); font-variant-numeric: tabular-nums; }
+
+  /* ── Feed cap ────────────────────────────────────────────────────────── */
+  .feed-cap {
+    margin: 0.75rem 0 0;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 0.925rem;
+    color: var(--ink-mute);
   }
+  .feed-cap-mark { display: block; color: var(--accent); font-size: 1.4rem; line-height: 0.6; margin-bottom: 0.4rem; }
 </style>
