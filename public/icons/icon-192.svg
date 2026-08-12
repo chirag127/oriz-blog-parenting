@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <title>Kitchen Table — family blog</title>
+  <rect width="192" height="192" rx="48" fill="#7a4e9e"/>
+  <!-- doorframe growth ruler: a vertical rail + three height ticks -->
+  <rect x="60" y="42" width="10" height="108" rx="5" fill="#fbf7f0" opacity="0.55"/>
+  <rect x="60" y="54"  width="52" height="10" rx="5" fill="#fbf7f0"/>
+  <rect x="60" y="90"  width="72" height="10" rx="5" fill="#f2a63b"/>
+  <rect x="60" y="126" width="40" height="10" rx="5" fill="#fbf7f0"/>
+</svg>
