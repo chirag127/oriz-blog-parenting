@@ -126,9 +126,12 @@ const jsonLd = {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2vw, 1rem);
   }
   .post-list > li:last-child :global(.post-card) {
-    border-bottom: 1px solid var(--rule);
+    /* cards are self-contained rounded panels — no extra rule needed */
   }
   .pager {
     margin-top: 2rem;

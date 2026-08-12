@@ -18,11 +18,11 @@ const isActive = (href: string, exact = false) =>
   exact ? path === href : path === href || path.startsWith(href)
 
 const items = [
-  { label: 'Feed', href: '/', glyph: 'home', active: isActive('/', true) },
+  { label: 'Home', href: '/', glyph: 'home', active: isActive('/', true) },
   { label: 'Guides', href: '/series/', glyph: 'guides', active: isActive('/series/') },
-  { label: 'Corners', href: '/categories/', glyph: 'corners', active: isActive('/categories/') || isActive('/tags/') },
+  { label: 'Ages', href: '/categories/', glyph: 'corners', active: isActive('/categories/') || isActive('/tags/') },
   { label: 'About', href: '/about/', glyph: 'about', active: isActive('/about/') },
-  { label: 'Find', href: '/search/', glyph: 'find', active: isActive('/search/') },
+  { label: 'Search', href: '/search/', glyph: 'find', active: isActive('/search/') },
 ]
 ---
 

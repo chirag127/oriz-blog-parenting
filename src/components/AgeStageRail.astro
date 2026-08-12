@@ -1,0 +1,133 @@
+---
+/**
+ * AgeStageRail — signature parenting component.
+ *
+ * A horizontal "growth ruler" that shows the five family stages as
+ * crayon-coloured chips. Clicking a stage deep-links to the category
+ * that most closely maps to that stage. The active stage (determined
+ * by the `active` prop, or none if omitted) gets a filled lozenge.
+ *
+ * This element exists ONLY on the parenting blog — it is the
+ * visual shorthand for "find content for where your family is right now".
+ *
+ * Usage:
+ *   <AgeStageRail />                 — no stage active
+ *   <AgeStageRail active="toddler" /> — "Toddler" stage highlighted
+ */
+
+export interface Props {
+  active?: 'newborn' | 'toddler' | 'preschool' | 'schoolage' | 'tween'
+}
+
+const { active } = Astro.props
+
+const stages = [
+  { id: 'newborn',   label: '0–1',   name: 'Newborn',    href: '/categories/', color: 'var(--v-health)' },
+  { id: 'toddler',   label: '1–3',   name: 'Toddler',    href: '/categories/', color: 'var(--v-culture)' },
+  { id: 'preschool', label: '3–5',   name: 'Pre-school', href: '/categories/', color: 'var(--v-finance)' },
+  { id: 'schoolage', label: '6–11',  name: 'School age', href: '/categories/', color: 'var(--v-dev)' },
+  { id: 'tween',     label: '12+',   name: 'Tween+',     href: '/categories/', color: 'var(--v-personal)' },
+]
+---
+
+<nav class="asr" aria-label="Browse by age stage">
+  <span class="asr-label">Where are you now?</span>
+  <ul class="asr-list">
+    {stages.map((s) => (
+      <li>
+        <a
+          href={s.href}
+          class:list={['asr-chip', s.id === active && 'is-active']}
+          style={`--stage-color:${s.color}`}
+          aria-current={s.id === active ? 'page' : undefined}
+        >
+          <span class="asr-age">{s.label}</span>
+          <span class="asr-name">{s.name}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .asr {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    padding: 1rem 1.1rem;
+    background: color-mix(in oklab, var(--accent) 4%, var(--paper));
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-card);
+  }
+
+  .asr-label {
+    font-family: var(--font-utility);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    white-space: nowrap;
+  }
+
+  .asr-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .asr-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--stage-color);
+    background: transparent;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .asr-chip:hover {
+    background: color-mix(in oklab, var(--stage-color) 12%, transparent);
+  }
+
+  .asr-chip.is-active {
+    background: var(--stage-color);
+    color: #fff;
+    border-color: var(--stage-color);
+  }
+
+  .asr-age {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--stage-color);
+  }
+
+  .asr-chip.is-active .asr-age {
+    color: #fff;
+  }
+
+  .asr-name {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .asr-chip { transition: none; }
+  }
+</style>

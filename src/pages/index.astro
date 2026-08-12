@@ -18,6 +18,7 @@
  */
 import BaseLayout from '~/layouts/BaseLayout.astro'
 import SeriesSpine from '~/components/SeriesSpine.astro'
+import AgeStageRail from '~/components/AgeStageRail.astro'
 import {
   getCategoriesWithCounts,
   getPostsInSeries,
@@ -145,6 +146,9 @@ const jsonLd = {
         <a class="btn btn-ghost" href="/about/">What this is</a>
       </div>
     </section>
+
+    {/* ── Age-stage rail — signature parenting component ─────────────────── */}
+    <AgeStageRail />
 
     {lead && (
       <article class="card card-lead" data-vertical={leadVertical} aria-labelledby="lead-title">

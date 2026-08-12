@@ -34,21 +34,21 @@ const tags = (await getTagsWithCounts()).slice(0, 8).map(({ tag }) => tag)
   </div>
   <div class="bf-grid">
     <div class="bf-col">
-      <h3 class="bf-h">Topics</h3>
+      <h3 class="bf-h">By Age</h3>
       <ul>
         {categories.map((c) => <li><a href={c.slug ? `/categories/${c.slug}/` : '/categories/'}>{c.name}</a></li>)}
       </ul>
     </div>
     <div class="bf-col">
-      <h3 class="bf-h">Recent</h3>
+      <h3 class="bf-h">Read</h3>
       <ul>
-        <li><a href="/blog/">Latest posts</a></li>
-        <li><a href="/archive/">Archive</a></li>
-        <li><a href="/now/">Now</a></li>
+        <li><a href="/blog/">Latest notes</a></li>
+        <li><a href="/archive/">Full archive</a></li>
+        <li><a href="/now/">What's on now</a></li>
       </ul>
     </div>
     <div class="bf-col">
-      <h3 class="bf-h">Tags</h3>
+      <h3 class="bf-h">Topics</h3>
       <ul class="bf-tags">
         {tags.map((t) => <li><a href={`/tags/${slugifyTag(t)}/`}>#{t}</a></li>)}
       </ul>
@@ -57,7 +57,7 @@ const tags = (await getTagsWithCounts()).slice(0, 8).map(({ tag }) => tag)
       <h3 class="bf-h">Guides</h3>
       <ul>
         <li><a href="/series/">Browse guides</a></li>
-        <li><a href="/blog/">Latest posts</a></li>
+        <li><a href="/blog/">Latest notes</a></li>
       </ul>
     </div>
   </div>
